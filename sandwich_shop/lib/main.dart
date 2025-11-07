@@ -29,6 +29,7 @@ class OrderScreen extends StatefulWidget {
 
 class _OrderScreenState extends State<OrderScreen> {
   int _quantity = 0;
+  String _selectedType = 'Footlong'; // NEW: selected sandwich size
 
   void _increaseQuantity() {
     if (_quantity < widget.maxQuantity) {
@@ -54,7 +55,18 @@ class _OrderScreenState extends State<OrderScreen> {
           children: <Widget>[
             OrderItemDisplay(
               _quantity,
-              'Footlong',
+              _selectedType,
+            ),
+            const SizedBox(height: 16),
+            SegmentedButton<String>(
+              segments: const <ButtonSegment<String>>[
+                ButtonSegment(value: 'Footlong', label: Text('Footlong')),
+                ButtonSegment(value: 'Six-inch', label: Text('Six-inch')),
+              ],
+              selected: <String>{_selectedType},
+              onSelectionChanged: (Set<String> newSelection) {
+                setState(() => _selectedType = newSelection.first);
+              },
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -63,22 +75,23 @@ class _OrderScreenState extends State<OrderScreen> {
                   child: ElevatedButton(
                     onPressed: _quantity < widget.maxQuantity ? _increaseQuantity : null,
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-                        (states) => states.contains(MaterialState.disabled) ? Colors.grey : Colors.red,
+                      backgroundColor: WidgetStateProperty.resolveWith<Color?>(
+                        (states) => states.contains(WidgetState.disabled) ? Colors.grey : Colors.red,
                       ),
-                      foregroundColor: MaterialStateProperty.all(Colors.white),
+                      foregroundColor: WidgetStateProperty.all(Colors.white),
                     ),
                     child: const Text('Add'),
                   ),
                 ),
+                const SizedBox(width: 12),
                 SizedBox(
                   child: ElevatedButton(
                     onPressed: _quantity > 0 ? _decreaseQuantity : null,
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-                        (states) => states.contains(MaterialState.disabled) ? Colors.grey : Colors.red,
+                      backgroundColor: WidgetStateProperty.resolveWith<Color?>(
+                        (states) => states.contains(WidgetState.disabled) ? Colors.grey : Colors.red,
                       ),
-                      foregroundColor: MaterialStateProperty.all(Colors.white),
+                      foregroundColor: WidgetStateProperty.all(Colors.white),
                     ),
                     child: const Text('Remove'),
                   ),
