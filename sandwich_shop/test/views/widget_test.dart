@@ -81,6 +81,24 @@ void main() {
       await tester.pump();
       expect(find.text('Note: Extra mayo'), findsOneWidget);
     });
+
+    testWidgets('toggles sandwich size with Switch',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const App());
+
+      // initial state should show footlong
+      expect(find.text('0 white footlong sandwich(es): '), findsOneWidget);
+
+      // tap the Switch to toggle to six-inch
+      await tester.tap(find.byType(Switch));
+      await tester.pump();
+      expect(find.text('0 white six-inch sandwich(es): '), findsOneWidget);
+
+      // tap again to toggle back to footlong
+      await tester.tap(find.byType(Switch));
+      await tester.pump();
+      expect(find.text('0 white footlong sandwich(es): '), findsOneWidget);
+    });
   });
 
   group('StyledButton', () {

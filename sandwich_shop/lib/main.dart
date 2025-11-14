@@ -36,6 +36,7 @@ class _OrderScreenState extends State<OrderScreen> {
   late final OrderRepository _orderRepository;
   final TextEditingController _notesController = TextEditingController();
   bool _isFootlong = true;
+  bool _isToasted = false; // NEW: track toasted option
   BreadType _selectedBreadType = BreadType.white;
 
   @override
@@ -121,17 +122,36 @@ class _OrderScreenState extends State<OrderScreen> {
               orderNote: noteForDisplay,
             ),
             const SizedBox(height: 20),
+            // Sandwich size row (add a key so tests can find this Switch uniquely)
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text('six-inch', style: normalText),
                 Switch(
+                  key: const Key('size_switch'),
                   value: _isFootlong,
                   onChanged: _onSandwichTypeChanged,
                 ),
                 const Text('footlong', style: normalText),
               ],
             ),
+
+            // NEW: Toasted option row (separate Switch with its own key)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('untoasted', style: normalText),
+                Switch(
+                  key: const Key('toast_switch'),
+                  value: _isToasted,
+                  onChanged: (value) {
+                    setState(() => _isToasted = value);
+                  },
+                ),
+                const Text('toasted', style: normalText),
+              ],
+            ),
+
             const SizedBox(height: 10),
             DropdownMenu<BreadType>(
               textStyle: normalText,
