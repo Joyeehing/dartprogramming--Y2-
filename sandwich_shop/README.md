@@ -21,7 +21,7 @@ Prerequisites
 
 Clone the repo
 ```bash
-git clone <https://github.com/Joyeehing/dartprogramming--Y2-.git>
+git clone https://github.com/Joyeehing/dartprogramming--Y2-.git
 cd "c:\Users\user\OneDrive\Documents\dartprogramming (Y2)\sandwich_shop"
 ```
 
