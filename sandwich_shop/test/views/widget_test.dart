@@ -123,7 +123,7 @@ void main() {
   group('OrderItemDisplay', () {
     testWidgets('shows correct text and note for zero sandwiches',
         (WidgetTester tester) async {
-      const widgetToBeTested = OrderItemDisplay(
+      final widgetToBeTested = OrderItemDisplay(
         quantity: 0,
         itemType: 'footlong',
         breadType: BreadType.white,
@@ -139,7 +139,7 @@ void main() {
 
     testWidgets('shows correct text and emoji for three sandwiches',
         (WidgetTester tester) async {
-      const widgetToBeTested = OrderItemDisplay(
+      final widgetToBeTested = OrderItemDisplay(
         quantity: 3,
         itemType: 'footlong',
         breadType: BreadType.white,
