@@ -1,14 +1,12 @@
-import 'package:sandwich_shop/views/app_styles.dart';
-import 'package:sandwich_shop/repositories/order_repository.dart';
-import 'package:sandwich_shop/repositories/pricing_repository.dart';
 import 'package:flutter/material.dart';
-
+import 'package:sandwich_shop/views/app_styles.dart';
+import 'package:sandwich_shop/models/sandwich.dart';
+import 'package:sandwich_shop/models/cart.dart';
 
 void main() {
   runApp(const App());
 }
 
-enum BreadType { white, wheat, wholemeal }
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -34,18 +32,17 @@ class OrderScreen extends StatefulWidget {
 }
 
 class _OrderScreenState extends State<OrderScreen> {
-  late final OrderRepository _orderRepository;
-  late final PricingRepository _pricingRepository;
   final TextEditingController _notesController = TextEditingController();
   bool _isFootlong = true;
   bool _isToasted = false; // NEW: track toasted option
   BreadType _selectedBreadType = BreadType.white;
+  late final Cart _cart;
+  final SandwichType _selectedSandwichType = SandwichType.veggieDelight;
 
   @override
   void initState() {
     super.initState();
-    _orderRepository = OrderRepository(maxQuantity: widget.maxQuantity);
-    _pricingRepository = PricingRepository();
+    _cart = Cart();
     _notesController.addListener(() {
       setState(() {});
     });
@@ -55,20 +52,6 @@ class _OrderScreenState extends State<OrderScreen> {
   void dispose() {
     _notesController.dispose();
     super.dispose();
-  }
-
-  VoidCallback? _getIncreaseCallback() {
-    if (_orderRepository.canIncrement) {
-      return () => setState(_orderRepository.increment);
-    }
-    return null;
-  }
-
-  VoidCallback? _getDecreaseCallback() {
-    if (_orderRepository.canDecrement) {
-      return () => setState(_orderRepository.decrement);
-    }
-    return null;
   }
 
   void _onSandwichTypeChanged(bool value) {
@@ -93,6 +76,41 @@ class _OrderScreenState extends State<OrderScreen> {
     return entries;
   }
 
+  Sandwich _currentSelection() {
+    return Sandwich(
+      type: _selectedSandwichType,
+      isFootlong: _isFootlong,
+      breadType: _selectedBreadType,
+    );
+  }
+
+  int _quantityInCart() {
+    final sel = _currentSelection();
+    final item = _cart.items.firstWhere(
+      (ci) => ci.sandwich.type == sel.type && ci.sandwich.isFootlong == sel.isFootlong && ci.sandwich.breadType == sel.breadType,
+      orElse: () => CartItem(sel, 0),
+    );
+    return item.quantity;
+  }
+
+  VoidCallback? _getIncreaseCallback() {
+    if (_quantityInCart() < widget.maxQuantity) {
+      return () {
+        setState(() => _cart.add(_currentSelection()));
+      };
+    }
+    return null;
+  }
+
+  VoidCallback? _getDecreaseCallback() {
+    if (_quantityInCart() > 0) {
+      return () {
+        setState(() => _cart.remove(_currentSelection()));
+      };
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     String sandwichType = 'footlong';
@@ -106,9 +124,6 @@ class _OrderScreenState extends State<OrderScreen> {
     } else {
       noteForDisplay = _notesController.text;
     }
-
-    // compute total price
-    final double total = _pricingRepository.totalPrice(_orderRepository.quantity, _isFootlong);
 
     return Scaffold(
       appBar: AppBar(
@@ -126,14 +141,14 @@ class _OrderScreenState extends State<OrderScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             OrderItemDisplay(
-              quantity: _orderRepository.quantity,
+              quantity: _quantityInCart(),
               itemType: sandwichType,
               breadType: _selectedBreadType,
               orderNote: noteForDisplay,
             ),
             const SizedBox(height: 8),
-            // display total price
-            Text('Total: £${total.toStringAsFixed(2)}', style: normalText),
+            // display total price (computed from Cart)
+            Text('Total: £${_cart.totalPrice().toStringAsFixed(2)}', style: normalText),
             const SizedBox(height: 20),
             // Sandwich size row (add a key so tests can find this Switch uniquely)
             Row(
