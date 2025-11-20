@@ -158,6 +158,7 @@ class _OrderScreenState extends State<OrderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    TextStyle? heading2;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
