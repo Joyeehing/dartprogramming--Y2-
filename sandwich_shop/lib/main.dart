@@ -174,12 +174,24 @@ class _OrderScreenState extends State<OrderScreen> {
                 height: 300,
                 child: Image.asset(
                   _getCurrentImagePath(),
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Center(
-                      child: Text(
-                        'Image not found',
-                        style: normalText,
+                  width: 200,
+                  height: 120,
+                  fit: BoxFit.cover, // fills the box; may crop edges
+                  errorBuilder:
+                      (BuildContext context, Object error, StackTrace? stackTrace) {
+                    // fallback UI when the asset can't be loaded
+                    return Container(
+                      width: 200,
+                      height: 120,
+                      color: Colors.grey[200],
+                      alignment: Alignment.center,
+                      child: const Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.broken_image, size: 32, color: Colors.grey),
+                          SizedBox(height: 4),
+                          Text('Image unavailable', style: TextStyle(fontSize: 12)),
+                        ],
                       ),
                     );
                   },
