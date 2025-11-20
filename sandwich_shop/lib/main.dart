@@ -32,17 +32,17 @@ class OrderScreen extends StatefulWidget {
 }
 
 class _OrderScreenState extends State<OrderScreen> {
+  final Cart _cart = Cart();
   final TextEditingController _notesController = TextEditingController();
+
+  SandwichType _selectedSandwichType = SandwichType.veggieDelight;
   bool _isFootlong = true;
-  bool _isToasted = false; // NEW: track toasted option
   BreadType _selectedBreadType = BreadType.white;
-  late final Cart _cart;
-  final SandwichType _selectedSandwichType = SandwichType.veggieDelight;
+  int _quantity = 1;
 
   @override
   void initState() {
     super.initState();
-    _cart = Cart();
     _notesController.addListener(() {
       setState(() {});
     });
@@ -54,170 +54,194 @@ class _OrderScreenState extends State<OrderScreen> {
     super.dispose();
   }
 
-  void _onSandwichTypeChanged(bool value) {
-    setState(() => _isFootlong = value);
-  }
-
-  void _onBreadTypeSelected(BreadType? value) {
-    if (value != null) {
-      setState(() => _selectedBreadType = value);
-    }
-  }
-
-  List<DropdownMenuEntry<BreadType>> _buildDropdownEntries() {
-    List<DropdownMenuEntry<BreadType>> entries = [];
-    for (BreadType bread in BreadType.values) {
-      DropdownMenuEntry<BreadType> newEntry = DropdownMenuEntry<BreadType>(
-        value: bread,
-        label: bread.name,
-      );
-      entries.add(newEntry);
-    }
-    return entries;
-  }
-
-  Sandwich _currentSelection() {
-    return Sandwich(
+  void _addToCart() {
+    final sandwich = Sandwich(
       type: _selectedSandwichType,
       isFootlong: _isFootlong,
       breadType: _selectedBreadType,
     );
-  }
 
-  int _quantityInCart() {
-    final sel = _currentSelection();
-    final item = _cart.items.firstWhere(
-      (ci) => ci.sandwich.type == sel.type && ci.sandwich.isFootlong == sel.isFootlong && ci.sandwich.breadType == sel.breadType,
-      orElse: () => CartItem(sel, 0),
+    // Cart.add(Sandwich sandwich, {int quantity = 1})
+    _cart.add(sandwich, quantity: _quantity);
+
+    debugPrint(
+      'Added $_quantity ${sandwich.isFootlong ? 'footlong' : 'six-inch'} ${sandwich.name} on ${sandwich.breadType.name} bread to cart',
     );
-    return item.quantity;
+
+    setState(() {}); // refresh UI (total, item counts, etc.)
   }
 
-  VoidCallback? _getIncreaseCallback() {
-    if (_quantityInCart() < widget.maxQuantity) {
-      return () {
-        setState(() => _cart.add(_currentSelection()));
-      };
+  VoidCallback? _getAddToCartCallback() {
+    if (_quantity > 0) {
+      return _addToCart;
     }
     return null;
   }
 
+  List<DropdownMenuEntry<SandwichType>> _buildSandwichTypeEntries() {
+    List<DropdownMenuEntry<SandwichType>> entries = [];
+    for (SandwichType type in SandwichType.values) {
+      Sandwich sandwich =
+          Sandwich(type: type, isFootlong: true, breadType: BreadType.white);
+      DropdownMenuEntry<SandwichType> entry = DropdownMenuEntry<SandwichType>(
+        value: type,
+        label: sandwich.name,
+      );
+      entries.add(entry);
+    }
+    return entries;
+  }
+
+  List<DropdownMenuEntry<BreadType>> _buildBreadTypeEntries() {
+    List<DropdownMenuEntry<BreadType>> entries = [];
+    for (BreadType bread in BreadType.values) {
+      DropdownMenuEntry<BreadType> entry = DropdownMenuEntry<BreadType>(
+        value: bread,
+        label: bread.name,
+      );
+      entries.add(entry);
+    }
+    return entries;
+  }
+
+  String _getCurrentImagePath() {
+    final Sandwich sandwich = Sandwich(
+      type: _selectedSandwichType,
+      isFootlong: _isFootlong,
+      breadType: _selectedBreadType,
+    );
+    return sandwich.image;
+  }
+
+  void _onSandwichTypeChanged(SandwichType? value) {
+    if (value != null) {
+      setState(() {
+        _selectedSandwichType = value;
+      });
+    }
+  }
+
+  void _onSizeChanged(bool value) {
+    setState(() {
+      _isFootlong = value;
+    });
+  }
+
+  void _onBreadTypeChanged(BreadType? value) {
+    if (value != null) {
+      setState(() {
+        _selectedBreadType = value;
+      });
+    }
+  }
+
+  void _increaseQuantity() {
+    setState(() {
+      _quantity++;
+    });
+  }
+
+  void _decreaseQuantity() {
+    if (_quantity > 0) {
+      setState(() {
+        _quantity--;
+      });
+    }
+  }
+
   VoidCallback? _getDecreaseCallback() {
-    if (_quantityInCart() > 0) {
-      return () {
-        setState(() => _cart.remove(_currentSelection()));
-      };
+    if (_quantity > 0) {
+      return _decreaseQuantity;
     }
     return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    String sandwichType = 'footlong';
-    if (!_isFootlong) {
-      sandwichType = 'six-inch';
-    }
-
-    String noteForDisplay;
-    if (_notesController.text.isEmpty) {
-      noteForDisplay = 'No notes added.';
-    } else {
-      noteForDisplay = _notesController.text;
-    }
-
     return Scaffold(
       appBar: AppBar(
-        leading: SizedBox(
-          height: 100,
-          child: Image.asset('assets/images/logo.png'),
-        ),
         title: const Text(
           'Sandwich Counter',
           style: heading1,
         ),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            OrderItemDisplay(
-              quantity: _quantityInCart(),
-              itemType: sandwichType,
-              breadType: _selectedBreadType,
-              orderNote: noteForDisplay,
-            ),
-            const SizedBox(height: 8),
-            // display total price (computed from Cart)
-            Text('Total: £${_cart.totalPrice().toStringAsFixed(2)}', style: normalText),
-            const SizedBox(height: 20),
-            // Sandwich size row (add a key so tests can find this Switch uniquely)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('six-inch', style: normalText),
-                Switch(
-                  key: const Key('size_switch'),
-                  value: _isFootlong,
-                  onChanged: _onSandwichTypeChanged,
-                ),
-                const Text('footlong', style: normalText),
-              ],
-            ),
-
-            // NEW: Toasted option row (separate Switch with its own key)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('untoasted', style: normalText),
-                Switch(
-                  key: const Key('toast_switch'),
-                  value: _isToasted,
-                  onChanged: (value) {
-                    setState(() => _isToasted = value);
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                height: 300,
+                child: Image.asset(
+                  _getCurrentImagePath(),
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Center(
+                      child: Text(
+                        'Image not found',
+                        style: normalText,
+                      ),
+                    );
                   },
                 ),
-                const Text('toasted', style: normalText),
-              ],
-            ),
-
-            const SizedBox(height: 10),
-            DropdownMenu<BreadType>(
-              textStyle: normalText,
-              initialSelection: _selectedBreadType,
-              onSelected: _onBreadTypeSelected,
-              dropdownMenuEntries: _buildDropdownEntries(),
-            ),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.all(40.0),
-              child: TextField(
-                key: const Key('notes_textfield'),
-                controller: _notesController,
-                decoration: const InputDecoration(
-                  labelText: 'Add a note (e.g., no onions)',
-                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                StyledButton(
-                  onPressed: _getIncreaseCallback(),
-                  icon: Icons.add,
-                  label: 'Add',
-                  backgroundColor: Colors.green,
-                ),
-                const SizedBox(width: 8),
-                StyledButton(
-                  onPressed: _getDecreaseCallback(),
-                  icon: Icons.remove,
-                  label: 'Remove',
-                  backgroundColor: Colors.red,
-                ),
-              ],
-            ),
-          ],
+              const SizedBox(height: 20),
+              DropdownMenu<SandwichType>(
+                width: double.infinity,
+                label: const Text('Sandwich Type'),
+                textStyle: normalText,
+                initialSelection: _selectedSandwichType,
+                onSelected: _onSandwichTypeChanged,
+                dropdownMenuEntries: _buildSandwichTypeEntries(),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Six-inch', style: normalText),
+                  Switch(
+                    key: const Key('size_switch'),
+                    value: _isFootlong,
+                    onChanged: _onSizeChanged,
+                  ),
+                  const Text('Footlong', style: normalText),
+                ],
+              ),
+              const SizedBox(height: 20),
+              DropdownMenu<BreadType>(
+                width: double.infinity,
+                label: const Text('Bread Type'),
+                textStyle: normalText,
+                initialSelection: _selectedBreadType,
+                onSelected: _onBreadTypeChanged,
+                dropdownMenuEntries: _buildBreadTypeEntries(),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Quantity: ', style: normalText),
+                  IconButton(
+                    onPressed: _getDecreaseCallback(),
+                    icon: const Icon(Icons.remove),
+                  ),
+                  Text('$_quantity', style: heading2),
+                  IconButton(
+                    onPressed: _increaseQuantity,
+                    icon: const Icon(Icons.add),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              StyledButton(
+                onPressed: _getAddToCartCallback(),
+                icon: Icons.add_shopping_cart,
+                label: 'Add to Cart',
+                backgroundColor: Colors.green,
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
@@ -260,40 +284,6 @@ class StyledButton extends StatelessWidget {
   }
 }
 
-class OrderItemDisplay extends StatelessWidget {
-  final int quantity;
-  final String itemType;
-  final BreadType breadType;
-  final String orderNote;
-
-  const OrderItemDisplay({
-    super.key,
-    required this.quantity,
-    required this.itemType,
-    required this.breadType,
-    required this.orderNote,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    String displayText =
-        '$quantity ${breadType.name} $itemType sandwich(es): ${'🥪' * quantity}';
-
-    return Column(
-      children: [
-        Text(
-          displayText,
-          style: normalText,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Note: $orderNote',
-          style: normalText,
-        ),
-      ],
-    );
-  }
-}
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
