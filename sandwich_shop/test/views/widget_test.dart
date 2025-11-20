@@ -156,7 +156,7 @@ void main() {
 
     testWidgets('shows correct bread and type for two six-inch wheat',
         (WidgetTester tester) async {
-      const widgetToBeTested = OrderItemDisplay(
+      final widgetToBeTested = OrderItemDisplay(
         quantity: 2,
         itemType: 'six-inch',
         breadType: BreadType.wheat,
@@ -172,7 +172,7 @@ void main() {
 
     testWidgets('shows correct bread and type for one wholemeal footlong',
         (WidgetTester tester) async {
-      const widgetToBeTested = OrderItemDisplay(
+      final widgetToBeTested = OrderItemDisplay(
         quantity: 1,
         itemType: 'footlong',
         breadType: BreadType.wholemeal,
@@ -185,6 +185,34 @@ void main() {
       expect(
           find.text('1 wholemeal footlong sandwich(es): 🥪'), findsOneWidget);
       expect(find.text('Note: Lots of lettuce'), findsOneWidget);
+    });
+  });
+
+  group('OrderScreen - Total Price', () {
+    testWidgets('size switch and Add button update total price',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const App());
+      await tester.pumpAndSettle();
+
+      // initial total should be zero
+      expect(find.text('Total: £0.00'), findsOneWidget);
+
+      // Tap Add once (default is footlong => £11)
+      await tester.tap(find.text('Add'));
+      await tester.pumpAndSettle();
+      expect(find.text('Total: £11.00'), findsOneWidget);
+
+      // Toggle the size switch to six-inch (find by key to avoid ambiguity)
+      await tester.tap(find.byKey(const Key('size_switch')));
+      await tester.pumpAndSettle();
+
+      // Tap Add again (six-inch => £7). Total should be 11 + 7 = 18
+      await tester.tap(find.text('Add'));
+      await tester.pumpAndSettle();
+      expect(find.text('Total: £18.00'), findsOneWidget);
+
+      // Verify the UI shows six-inch somewhere (OrderItemDisplay)
+      expect(find.textContaining('six-inch'), findsWidgets);
     });
   });
 }
