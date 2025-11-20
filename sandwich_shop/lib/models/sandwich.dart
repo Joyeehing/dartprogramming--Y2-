@@ -31,14 +31,28 @@ class Sandwich {
     }
   }
 
-  String get image {
-    String typeString = type.name;
-    String sizeString = '';
-    if (isFootlong) {
-      sizeString = 'footlong';
-    } else {
-      sizeString = 'six_inch';
+  String _toSnakeCase(String input) {
+    final buffer = StringBuffer();
+    for (var i = 0; i < input.length; i++) {
+      final char = input[i];
+      if (char.toUpperCase() == char && i > 0 && input[i - 1] != '_' ) {
+        buffer.write('_');
+      }
+      buffer.write(char.toLowerCase());
     }
-    return 'assets/images/${typeString}_$sizeString.png';
+    return buffer.toString().replaceAll('__', '_');
+  }
+
+  String get image {
+    switch (type) {
+      case SandwichType.veggieDelight:
+        return isFootlong ? 'assets/images/veggie_delight_footlong.png' : 'assets/images/veggie_delight_six_inch.png';
+      case SandwichType.chickenTeriyaki:
+        return isFootlong ? 'assets/images/chicken_teriyaki_footlong.png' : 'assets/images/chicken_teriyaki_six_inch.png';
+      case SandwichType.tunaMelt:
+        return isFootlong ? 'assets/images/tuna_melt_footlong.png' : 'assets/images/tuna_melt_six_inch.png';
+      case SandwichType.meatballMarinara:
+        return isFootlong ? 'assets/images/meatball_marinara_footlong.png' : 'assets/images/meatball_marinara_six_inch.png';
+    }
   }
 }
