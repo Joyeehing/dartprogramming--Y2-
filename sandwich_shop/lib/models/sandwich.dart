@@ -31,17 +31,6 @@ class Sandwich {
     }
   }
 
-  String _toSnakeCase(String input) {
-    final buffer = StringBuffer();
-    for (var i = 0; i < input.length; i++) {
-      final char = input[i];
-      if (char.toUpperCase() == char && i > 0 && input[i - 1] != '_' ) {
-        buffer.write('_');
-      }
-      buffer.write(char.toLowerCase());
-    }
-    return buffer.toString().replaceAll('__', '_');
-  }
 
   String get image {
     switch (type) {
