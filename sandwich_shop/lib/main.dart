@@ -7,7 +7,6 @@ void main() {
   runApp(const App());
 }
 
-
 class App extends StatelessWidget {
   const App({super.key});
 
@@ -39,6 +38,7 @@ class _OrderScreenState extends State<OrderScreen> {
   bool _isFootlong = true;
   BreadType _selectedBreadType = BreadType.white;
   int _quantity = 1;
+  final bool _isToasted = false;
 
   @override
   void initState() {
@@ -178,8 +178,8 @@ class _OrderScreenState extends State<OrderScreen> {
                   width: 200,
                   height: 120,
                   fit: BoxFit.cover, // fills the box; may crop edges
-                  errorBuilder:
-                      (BuildContext context, Object error, StackTrace? stackTrace) {
+                  errorBuilder: (BuildContext context, Object error,
+                      StackTrace? stackTrace) {
                     // fallback UI when the asset can't be loaded
                     return Container(
                       width: 200,
@@ -189,9 +189,11 @@ class _OrderScreenState extends State<OrderScreen> {
                       child: const Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.broken_image, size: 32, color: Colors.grey),
+                          Icon(Icons.broken_image,
+                              size: 32, color: Colors.grey),
                           SizedBox(height: 4),
-                          Text('Image unavailable', style: TextStyle(fontSize: 12)),
+                          Text('Image unavailable',
+                              style: TextStyle(fontSize: 12)),
                         ],
                       ),
                     );
@@ -199,6 +201,32 @@ class _OrderScreenState extends State<OrderScreen> {
                 ),
               ),
               const SizedBox(height: 20),
+
+              // Inline order summary (replacing orderItemDisplay function)
+              Builder(builder: (context) {
+                final emojis = List.filled(_quantity, '🥪').join();
+                final noteText = _notesController.text.isEmpty
+                    ? 'No notes added.'
+                    : _notesController.text;
+                final toastedText = _isToasted ? 'Toasted' : 'Untoasted';
+                final itemTypeText = _isFootlong ? 'footlong' : 'six-inch';
+
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '$_quantity ${_selectedBreadType.name} $itemTypeText sandwich(es): $emojis',
+                      style: normalText,
+                    ),
+                    const SizedBox(height: 8),
+                    Text('Note: $noteText', style: normalText),
+                    const SizedBox(height: 4),
+                    Text(toastedText, style: normalText),
+                  ],
+                );
+              }),
+              const SizedBox(height: 20),
+
               DropdownMenu<SandwichType>(
                 width: double.infinity,
                 label: const Text('Sandwich Type'),
@@ -297,7 +325,6 @@ class StyledButton extends StatelessWidget {
   }
 }
 
-
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
@@ -312,25 +339,19 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _incrementCounter() {
     setState(() {
-      
       _counter++;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       appBar: AppBar(
-      
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        
         title: Text(widget.title),
       ),
       body: Center(
-        
         child: Column(
-         
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text('Welcome to my shop!'),
