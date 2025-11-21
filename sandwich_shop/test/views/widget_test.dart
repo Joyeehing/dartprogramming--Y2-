@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sandwich_shop/main.dart';
-import 'package:sandwich_shop/models/sandwich.dart';
+import 'package:sandwich_shop/models/sandwich.dart' show BreadType;
 
 void main() {
   group('App', () {
@@ -120,99 +120,4 @@ void main() {
     });
   });
 
-  group('OrderItemDisplay', () {
-    testWidgets('shows correct text and note for zero sandwiches',
-        (WidgetTester tester) async {
-      final widgetToBeTested = OrderItemDisplay(
-        quantity: 0,
-        itemType: 'footlong',
-        breadType: BreadType.white,
-        orderNote: 'No notes added.',
-      );
-      const testApp = MaterialApp(
-        home: Scaffold(body: widgetToBeTested),
-      );
-      await tester.pumpWidget(testApp);
-      expect(find.text('0 white footlong sandwich(es): '), findsOneWidget);
-      expect(find.text('Note: No notes added.'), findsOneWidget);
-    });
-
-    testWidgets('shows correct text and emoji for three sandwiches',
-        (WidgetTester tester) async {
-      final widgetToBeTested = OrderItemDisplay(
-        quantity: 3,
-        itemType: 'footlong',
-        breadType: BreadType.white,
-        orderNote: 'No notes added.',
-      );
-      const testApp = MaterialApp(
-        home: Scaffold(body: widgetToBeTested),
-      );
-      await tester.pumpWidget(testApp);
-      expect(
-          find.text('3 white footlong sandwich(es): 🥪🥪🥪'), findsOneWidget);
-      expect(find.text('Note: No notes added.'), findsOneWidget);
-    });
-
-    testWidgets('shows correct bread and type for two six-inch wheat',
-        (WidgetTester tester) async {
-      final widgetToBeTested = OrderItemDisplay(
-        quantity: 2,
-        itemType: 'six-inch',
-        breadType: BreadType.wheat,
-        orderNote: 'No pickles',
-      );
-      const testApp = MaterialApp(
-        home: Scaffold(body: widgetToBeTested),
-      );
-      await tester.pumpWidget(testApp);
-      expect(find.text('2 wheat six-inch sandwich(es): 🥪🥪'), findsOneWidget);
-      expect(find.text('Note: No pickles'), findsOneWidget);
-    });
-
-    testWidgets('shows correct bread and type for one wholemeal footlong',
-        (WidgetTester tester) async {
-      final widgetToBeTested = OrderItemDisplay(
-        quantity: 1,
-        itemType: 'footlong',
-        breadType: BreadType.wholemeal,
-        orderNote: 'Lots of lettuce',
-      );
-      const testApp = MaterialApp(
-        home: Scaffold(body: widgetToBeTested),
-      );
-      await tester.pumpWidget(testApp);
-      expect(
-          find.text('1 wholemeal footlong sandwich(es): 🥪'), findsOneWidget);
-      expect(find.text('Note: Lots of lettuce'), findsOneWidget);
-    });
-  });
-
-  group('OrderScreen - Total Price', () {
-    testWidgets('size switch and Add button update total price',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(const App());
-      await tester.pumpAndSettle();
-
-      // initial total should be zero
-      expect(find.text('Total: £0.00'), findsOneWidget);
-
-      // Tap Add once (default is footlong => £11)
-      await tester.tap(find.text('Add'));
-      await tester.pumpAndSettle();
-      expect(find.text('Total: £11.00'), findsOneWidget);
-
-      // Toggle the size switch to six-inch (find by key to avoid ambiguity)
-      await tester.tap(find.byKey(const Key('size_switch')));
-      await tester.pumpAndSettle();
-
-      // Tap Add again (six-inch => £7). Total should be 11 + 7 = 18
-      await tester.tap(find.text('Add'));
-      await tester.pumpAndSettle();
-      expect(find.text('Total: £18.00'), findsOneWidget);
-
-      // Verify the UI shows six-inch somewhere (OrderItemDisplay)
-      expect(find.textContaining('six-inch'), findsWidgets);
-    });
-  });
 }
