@@ -44,4 +44,6 @@ class Sandwich {
         return isFootlong ? 'assets/images/meatball_marinara_footlong.png' : 'assets/images/meatball_marinara_six_inch.png';
     }
   }
+
+  price(bool isFootlong) {}
 }

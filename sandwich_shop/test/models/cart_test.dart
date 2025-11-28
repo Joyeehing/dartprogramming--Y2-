@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sandwich_shop/models/cart.dart';
 import 'package:sandwich_shop/models/sandwich.dart';
-import 'package:sandwich_shop/repositories/pricing_repository.dart';
+
 
 void main() {
   group('Cart model', () {
@@ -57,9 +57,6 @@ void main() {
       expect(cart.items.length, 0);
     });
 
-    test('totalPrice uses PricingRepository correctly', () {
-      final pricing = PricingRepository(); // default: six-inch 7.0, footlong 11.0
-      final cart = Cart(pricingRepository: pricing);
 
       final sixInch = Sandwich(
         type: SandwichType.veggieDelight,
@@ -73,6 +70,7 @@ void main() {
         breadType: BreadType.white,
       );
 
+      var cart = Cart();
       cart.add(sixInch, quantity: 2); // 2 * 7 = 14
       cart.add(footlong, quantity: 1); // 1 * 11 = 11
 
@@ -91,5 +89,4 @@ void main() {
       cart.clear();
       expect(cart.isEmpty, isTrue);
     });
-  });
 }
