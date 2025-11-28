@@ -40,6 +40,7 @@ class _OrderScreenState extends State<OrderScreen> {
   int _quantity = 1;
   final bool _isToasted = false;
 
+  String? _confirmationMessage;
 
   @override
   void initState() {
@@ -68,8 +69,9 @@ class _OrderScreenState extends State<OrderScreen> {
     final message =
         'Added $_quantity ${sandwich.isFootlong ? 'footlong' : 'six-inch'} ${sandwich.name} on ${sandwich.breadType.name} bread to cart';
 
-    // store message in state for potential UI/tests
+    // store message in state so UI updates (cart mutated + message)
     setState(() {
+      _confirmationMessage = message;
     });
 
     // show transient UI confirmation
@@ -79,9 +81,6 @@ class _OrderScreenState extends State<OrderScreen> {
         duration: const Duration(seconds: 2),
       ),
     );
-
-    // refresh UI (total, item counts, etc.)
-    setState(() {});
   }
 
   VoidCallback? _getAddToCartCallback() {
@@ -297,6 +296,24 @@ class _OrderScreenState extends State<OrderScreen> {
                 label: 'Add to Cart',
                 backgroundColor: Colors.green,
               ),
+              const SizedBox(height: 12),
+
+              // Persistent cart summary
+              Builder(builder: (context) {
+                final totalPrice = _cart.totalPrice();
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Cart: ${_cart.totalItems} item(s)', style: normalText),
+                    const SizedBox(height: 4),
+                    Text('Total: \$${totalPrice.toStringAsFixed(2)}', style: normalText),
+                    if (_confirmationMessage != null) ...[
+                      const SizedBox(height: 8),
+                      Text(_confirmationMessage!, style: normalText.copyWith(color: Colors.green)),
+                    ],
+                  ],
+                );
+              }),
               const SizedBox(height: 20),
             ],
           ),
