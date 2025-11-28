@@ -40,7 +40,6 @@ class _OrderScreenState extends State<OrderScreen> {
   int _quantity = 1;
   final bool _isToasted = false;
 
-  String? _confirmationMessage;
 
   @override
   void initState() {
@@ -71,7 +70,6 @@ class _OrderScreenState extends State<OrderScreen> {
 
     // store message in state for potential UI/tests
     setState(() {
-      _confirmationMessage = message;
     });
 
     // show transient UI confirmation
