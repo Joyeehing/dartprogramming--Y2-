@@ -168,6 +168,23 @@ class _OrderScreenState extends State<OrderScreen> {
     return null;
   }
 
+  /// Calculate total price from the cart items.
+  /// This uses a simple base-price formula so the app doesn't depend on
+  /// an external pricing repository. Adjust the base and multiplier as needed.
+  double _calculateTotalPrice() {
+    double sum = 0.0;
+    for (final item in _cart.items) {
+      final s = item.sandwich;
+      // Basic base price that varies by sandwich type index to create different prices.
+      // Modify this logic to match your real pricing rules.
+      final double basePrice = 4.0 + (s.type.index * 0.5);
+      // Footlong multiplier (example)
+      final double unitPrice = s.isFootlong ? basePrice * 1.8 : basePrice;
+      sum += unitPrice * item.quantity;
+    }
+    return sum;
+  }
+
   @override
   Widget build(BuildContext context) {
     TextStyle? heading2;
@@ -300,7 +317,7 @@ class _OrderScreenState extends State<OrderScreen> {
 
               // Persistent cart summary
               Builder(builder: (context) {
-                final totalPrice = _cart.totalPrice();
+                final totalPrice = _calculateTotalPrice();
                 return Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
