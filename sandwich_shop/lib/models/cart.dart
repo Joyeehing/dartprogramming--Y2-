@@ -1,5 +1,5 @@
 import 'package:sandwich_shop/models/sandwich.dart';
-import 'package:sandwich_shop/repositories/pricing_repository.dart';
+
 
 class CartItem {
   final Sandwich sandwich;
@@ -10,10 +10,7 @@ class CartItem {
 
 class Cart {
   final List<CartItem> _items = [];
-  final PricingRepository pricingRepository;
-
-  Cart({PricingRepository? pricingRepository})
-      : pricingRepository = pricingRepository ?? PricingRepository();
+ 
 
   List<CartItem> get items => List.unmodifiable(_items);
 
@@ -63,11 +60,11 @@ class Cart {
   /// Remove all items from the cart.
   void clear() => _items.clear();
 
-  /// Compute total price using PricingRepository as single source of truth.
+  /// Compute total price using Sandwich.price(isFootlong).
   double totalPrice() {
     double sum = 0.0;
     for (final item in _items) {
-      sum += pricingRepository.totalPrice(item.quantity, item.sandwich.isFootlong);
+      sum += item.sandwich.price(item.sandwich.isFootlong) * item.quantity;
     }
     return sum;
   }
