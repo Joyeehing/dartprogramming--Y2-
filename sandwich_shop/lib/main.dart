@@ -40,6 +40,8 @@ class _OrderScreenState extends State<OrderScreen> {
   int _quantity = 1;
   final bool _isToasted = false;
 
+  String? _confirmationMessage;
+
   @override
   void initState() {
     super.initState();
@@ -64,11 +66,24 @@ class _OrderScreenState extends State<OrderScreen> {
     // Cart.add(Sandwich sandwich, {int quantity = 1})
     _cart.add(sandwich, quantity: _quantity);
 
-    debugPrint(
-      'Added $_quantity ${sandwich.isFootlong ? 'footlong' : 'six-inch'} ${sandwich.name} on ${sandwich.breadType.name} bread to cart',
+    final message =
+        'Added $_quantity ${sandwich.isFootlong ? 'footlong' : 'six-inch'} ${sandwich.name} on ${sandwich.breadType.name} bread to cart';
+
+    // store message in state for potential UI/tests
+    setState(() {
+      _confirmationMessage = message;
+    });
+
+    // show transient UI confirmation
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 2),
+      ),
     );
 
-    setState(() {}); // refresh UI (total, item counts, etc.)
+    // refresh UI (total, item counts, etc.)
+    setState(() {});
   }
 
   VoidCallback? _getAddToCartCallback() {
